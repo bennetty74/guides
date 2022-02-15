@@ -224,22 +224,91 @@ GC Roots是标记阶段工作的起点对象集，根据起点对象的引用链
 在清除阶段，垃圾收集器会将标记阶段被标记为死亡对象的对象进行清理，并释放内存空间。如下白色空格就是移除死亡对象后释放的内存空间。
 ![](https://www.freecodecamp.org/news/content/images/size/w1000/2021/01/image-83.png)
 
-当然，一些垃圾收集器为了合理利用内存空间，在清除死亡对象后还会整理内存空间，将已用空间和空余内存空间分割开，以便于顺序访问和大对象的创建。
+当然，一些垃圾收集器为了合理利用内存空间，在清除死亡对象后还会整理内存空间，将已用空间和空余内存空间分割开，
+以便于顺序访问和大对象的创建。
 ![](https://www.freecodecamp.org/news/content/images/size/w1000/2021/01/image-85.png)
 
 
+##### 垃圾收集器中的分代思想
+分代主要针对Heap Area(堆)，分代思想将堆区分为年轻代和老年代。
+- Heap
+    - Young Generation
+        - EdenSpce
+        - Survive Space
+            - From Space
+            - To Space
+    - Old Generation
 
-那么垃圾收集器有哪些类型呢？
+- Non-Heap
+
+可以通过JVM参数`-Xms` `-Xmx`设置初始堆大小和最大堆大小。
+
+具体分布可见下图：
+![](https://www.freecodecamp.org/news/content/images/size/w1600/2021/01/image-70.png)
+
+**垃圾收集和分代关系**
+
+Minor GC
+
+所有对象的创建在Eden区域。当进行了一次垃圾回收后，Eden区域的死亡对象被清理，留存下来的对象被移动到Survivor区域中的一块。
+这样的一次GC叫做Minor GC。
+需要注意Minor GC同样会扫描Survivor区域，Survivor中留存下来的移动到另一块区域中。
+
+可以使用JVM参数`-Xmn`指定年轻代的大小。
+
+Major GC
+Major GC指的是老年代中的死亡对象被回收的过程。
+
+在年轻代发生Minor GC多次后仍然存活在Survivor区域的对象会进入老年代。
+具体多少次Minor GC后进入老年代，可以通过JVM参数设置。
+
+**Permanent Generation**
+永久代指的是方法区，用于存储class信息、方法信息。
+可以通过`-XX:PermGen` `-XX:MaxPermGen`指定永久代的初始大小和最大大小。
+> 从Java 8开始，MetaSpace替换了永久代的概念。相比永久代，元空间可以选自动调节大小，从而避免内存溢出的错误。
+
+
+说完垃圾回收的策略和分代思想，接下来我们可以看看每种垃圾收集器具体又是怎样实现的呢？
+
 
 垃圾收集器分为以下几种类型：
 - Serial GC： 是垃圾收集器最简单的实现，用于单线程的小应用。当该垃圾收集器执行时，会暂停整个应用用于垃圾收集。可以使用JVM参数`-XX:+UseSerialGC`使用Serial GC.
-
+![](https://www.freecodecamp.org/news/content/images/size/w1000/2021/01/image-68.png)
 - Parallel GC: 是JVM垃圾收集器的默认实现，使用多线程去完成垃圾收集。尽管如此，还是会存在应用的暂停。`-XX:+UseParallelGC`指定该垃圾收集器。
+![](https://www.freecodecamp.org/news/content/images/size/w1000/2021/01/image-66.png)
 
-- G1(Garbage First) GC: 该垃圾收集器是为多线程且堆大小很大(超过4GB)的应用而设计的。它将堆均等划分为大小相等的区域，并使用多线程去扫描所有区域，扫描完成后，总是优先清除无用对象最多的区域。使用JVM参数`-XX:+UseG1GC`指定该垃圾收集器。
-
-> 此外还有这样一个垃圾收集器： Concurrent Mark Sweep (CMS) GC.
+- CMS GC： CMS相比其他垃圾收集器会占用更多的CPU以提高应用性能。`-XX:+UseConcMarkSweepGC`
 > 不过在Java 9已经被标记为过期的垃圾收集器并在Java 14被移除。
+![](https://www.freecodecamp.org/news/content/images/size/w1000/2021/01/image-67.png)
+
+- G1(Garbage First) GC: 旨在替代CMS。该垃圾收集器是为多线程且堆大小很大(超过4GB)的应用而设计的。
+它将堆均等划分为大小相等的区域，并使用多线程去扫描所有区域，扫描完成后，总是优先清除无用对象最多的区域。
+使用JVM参数`-XX:+UseG1GC`指定该垃圾收集器。
+![](https://www.freecodecamp.org/news/content/images/size/w1000/2021/01/image-88.png)
+
+- ZGC: 随JDK 11发布，为低延迟的应用(少于10ms暂停)或大堆应用而设计的。
+
+
+了解了各种垃圾收集器的设计思路，如何合理选择垃圾收集器也显得尤为重要。
+- Serial：为单处理器系统应用设计的。
+
+- Parallel： 追求性能，能够忍受1s及以上的应用暂停时间
+
+- CMS/G1：追求响应时间，能够仍受较低的吞吐量
+
+- ZGC：追求响应时间，或者使用超大堆。
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #### Java Native Interface(JNI)
