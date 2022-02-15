@@ -12,7 +12,7 @@
 
 #### 磁盘结构
 
-![磁盘结构](https://gitee.com/bennetty74/guides/blob/master/imgs/database/disk-file.png)
+![磁盘结构](https://gitee.com/bennetty74/guides/raw/master/imgs/database/disk-file.png)
 
 ##### File Storage
 
@@ -52,7 +52,7 @@
 
 Page用于存储数据库表的tuples，由`Header`、`Slot Array`和`Tuples`构成。
 
-![Page Layout](https://gitee.com/bennetty74/guides/blob/master/imgs/database/page-layout.png)
+![](https://gitee.com/bennetty74/guides/raw/master/imgs/database/page-layout.png)
 
 
 
