@@ -186,13 +186,48 @@ public static int a = 1;
 
 #### 垃圾收集器
 
-Java语言不用像C/C++一样自己手动管理内存的申请和释放，而是有由JVM去自动管理内存，而这一角色就是执行引擎中的垃圾收集器负责。
-垃圾收集器用于查找并清除不再引用的对象，从而释放内存以便新对象生成。
+Java语言不用像C/C++一样自己手动管理内存的申请和释放，而是由JVM去自动管理内存。
+这一角色就是执行引擎中的垃圾收集器负责。垃圾收集器用于查找并清除不再引用的对象，从而释放内存以便有足够的内存空间供新对象生成。
+
+既然由JVM自动回收不再引用的对象，那么我们在编码中应该怎样告诉JVM该对象不再引用呢？
+
+- 将引用设置为null
+这样student对象就会在JVM进行垃圾回收时清除掉所占用内存。
+```java
+Student student = new Student();
+student = null;
+```
+- 将引用指向给另外一个对象
+```java
+Student studentOne = new Student();
+Student studentTwo = new Student();
+studentOne = studentTwo;
+```
+以上代码创建了两个Student对象，在studentOne指向了studentTwo后，第一个被创建的student对象则会在JVM进行垃圾回收时进行回收。
+
+- 使用匿名对象
+```java
+register(new Student());
+```
+
+> todo 描述引用和堆内对象的相互引用关系。在processon上面。
 
 垃圾收集分为两个阶段：
-- 标记阶段： 在该阶段，垃圾收集器负责标记哪些对象是无用(不再引用的对象)
 
+- 标记阶段： 在该阶段，垃圾收集器负责标记哪些对象是无用(不再引用的对象)
+标记阶段是在GC Roots的概念上工作的。
+GC Roots是标记阶段工作的起点对象集，根据起点对象的引用链，逐层往下遍历。能够遍历到的对象标记为Live。
+当从所有的GC Roots往下遍历完成后，便完成了标记阶段。堆区的剩余对象则被标记为无用对象以便在清除阶段清除并释放内存。
+
+![](https://www.freecodecamp.org/news/content/images/size/w1000/2021/01/image-76.png)
 - 清除阶段： 在该阶段，垃圾收集器负责清除标记阶段标记的无用对象并释放内存。
+在清除阶段，垃圾收集器会将标记阶段被标记为死亡对象的对象进行清理，并释放内存空间。如下白色空格就是移除死亡对象后释放的内存空间。
+![](https://www.freecodecamp.org/news/content/images/size/w1000/2021/01/image-83.png)
+
+当然，一些垃圾收集器为了合理利用内存空间，在清除死亡对象后还会整理内存空间，将已用空间和空余内存空间分割开，以便于顺序访问和大对象的创建。
+![](https://www.freecodecamp.org/news/content/images/size/w1000/2021/01/image-85.png)
+
+
 
 那么垃圾收集器有哪些类型呢？
 
