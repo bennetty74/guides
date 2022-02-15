@@ -62,7 +62,7 @@ Execution Engine
 用于将.class文件翻译成机器指令并执行。
 
 
-![JVM架构](https://media.geeksforgeeks.org/wp-content/uploads/jvm-3.jpg)
+![JVM架构](https://www.freecodecamp.org/news/content/images/size/w1000/2021/01/image-39.png)
 
 ### 读取class文件（类加载）
 
@@ -142,10 +142,16 @@ tomcat在部署项目时，我们会将项目的war包放在webapps目录下。
 
 ##### 准备
 
-准备阶段主要是对类变量分配内存，包含两个步骤：
+准备阶段主要是对类静态变量分配内存，包含两个步骤：
 
-- 为类变量分配内存
-- 为默认值分配内存
+- 为类静态变量分配内存
+- 为默认值分配内存并设置默认值
+
+如
+```java
+public static int a = 1;
+```
+在准备阶段会首先会为a分配内存，其次将int型的默认值0分配给a。
 
 ##### 解析
 
@@ -159,7 +165,13 @@ tomcat在部署项目时，我们会将项目的war包放在webapps目录下。
 
 #### 初始化
 
-在初始化阶段，JVM会为静态变量赋值、执行静态代码块。
+在初始化阶段，JVM会为静态变量赋值、执行静态代码块。本质是执行`<clinit>`方法的过程，被称为类的初始化。
+如
+```java
+public static int a = 1;
+```
+在初始化阶段会将1赋值给静态变量a。
+
 初始化阶段是在类和接口的继承关系维度上从上到下执行。
 
 ### 解释执行(执行引擎)
