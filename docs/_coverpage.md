@@ -1,4 +1,4 @@
-![logo](../assets/logo.svg) 
+![logo](assets/logo.svg) 
 
 # Bugkit Wiki <small>3.5</small>
 
