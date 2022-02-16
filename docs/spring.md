@@ -6,7 +6,9 @@ IOC英文全称为Inversion of Control，中文意思是控制反转，同样也
 
 Ioc具体意思如下：
 
-即将创建对象的控制权交给Spring,应用只负责声明。举个例子：
+即将创建对象的控制权交给Spring,应用只负责声明。对象的创建则是使用`反射`技术实现的。
+
+举个例子：
 
 原方式
 ```java
@@ -143,6 +145,195 @@ BeanDefinition包含如下bean的信息：
 - bean的依赖：如Student依赖于Book
 - ...
 
+### 如何定义为Spring的Bean
+
+有如下方式：
+
+- 基于XML配置
+
+```xml
+<bean id="exampleBean" class="examples.ExampleBean"/>
+```
+
+- 基于Java Annotation
+
+如在类上面使用注解`@Component`、`@Configuration`、`@Service`等。
+
+此外还可以在声明为Spring Bean的类方法上使用`@Bean`，表示该方法的返回值会作为Spring Bean，bean的名称则是方法名。
+
+
+
+### 1.3.1 Bean的初始化
+
+Bean的初始化指的是创建bean对象的过程。初始化bean有如下几种方式：
+
+- 使用构造器
+```xml
+<bean id="exampleBean" class="examples.ExampleBean"/>
+```
+按照如上声明的bean，Spring IOC容器在创建bean对象时是通过反射调用bean的构造方法创建的对象。
+
+- 使用静态工厂方法
+```xml
+<bean id="clientService" class="examples.ClientService" factory-method="createInstance"/>
+```
+
+```java
+public class ClientService {
+    private static ClientService clientService = new ClientService();
+    private ClientService() {}
+
+    public static ClientService createInstance() {
+        return clientService;
+    }
+}
+```
+
+- 使用实例工厂方法
+
+```xml
+<bean id="serviceLocator" class="examples.DefaultServiceLocator">
+</bean>
+<bean id="clientService"
+    factory-bean="serviceLocator"
+    factory-method="createClientServiceInstance"/>
+```
+
+```java
+public class DefaultServiceLocator {
+
+    private static ClientService clientService = new ClientServiceImpl();
+
+    public ClientService createClientServiceInstance() {
+        return clientService;
+    }
+}
+```
+
+## 1.4 依赖注入
+
+依赖注入英文全称为`Dependency Injection`，指的是将类属性所需要的bean通过反射的方式创建并复制给类属性的过程中。
+
+如下Student类的book成员的初始化的过程就是依赖注入的过程中.
+```java
+@Component
+public class Student{
+
+    // 声明
+    @Autowire
+    private Book book;
+
+    public void readBook(){
+        book.showText();
+    }
+
+}
+
+@Component
+public class Book{
+
+    public void showText(){
+        System.out.println("text);
+    }
+}
+```
+
+### 1.4.1 依赖注入的方式
+
+依赖注入的方式有很多种，分别是基于构造器注入、基于setter方式注入。
+
+#### 基于构造器注入
+
+```java
+public class SimpleMovieLister {
+
+    
+    private final MovieFinder movieFinder;
+
+    
+    public SimpleMovieLister(MovieFinder movieFinder) {
+        this.movieFinder = movieFinder;
+    }
+  
+    // ...
+}
+```
+!> todo 如何确定使用那个构造器？
+
+#### 基于Setter注入
+
+```java
+public class SimpleMovieLister {
+
+
+    private MovieFinder movieFinder;
+
+
+    public void setMovieFinder(MovieFinder movieFinder) {
+        this.movieFinder = movieFinder;
+    }
+
+    // ...
+}
+```
+**如何选择注入方式**
+在Spring官网文档说道，必须的依赖建议通过构造器注入，可选的通过setter注入。
+
+### 依赖注入的解析过程
+
+
+#### 循环依赖
+
+如果使用构造器注入的方式，可能会存在循环依赖的场景。
+
+什么是循环依赖？
+
+A依赖B，B依赖A。或A依赖B、B依赖C、C依赖A。等等。
+在这种情况下，A的构造需要等待B构造，B构造又需要等待A构造，从而导致A、B无法完成初始化。
+例子: 
+```java
+public class A{
+
+    private B b;
+
+    public A(B b){
+        this.b = b;
+    }
+}
+public class B{
+
+    private A a;
+
+    public B(A a){
+        this.a = a;
+    }
+}
+
+```
+
+如何解决循环依赖?
+
+答案是避免全部使用构造器注入或编码时注意循环依赖的产生。
+
+Spring是如何解决循环依赖的？
+
+### Depends On
+
+`depends-on`用于说明该bean依赖于另一个bean。
+
+什么意思呢？
+
+如下例子就是说`beanOne`初始化之前需要完成`manager` bean初始化。
+
+```xml
+<bean id="beanOne" class="ExampleBean" depends-on="manager"/>
+<bean id="manager" class="ManagerBean" />
+```
+
+### Bean 懒加载
+
+默认情况下，`ApplicationContext`所管理的bean是singlton scope。
+在初始化的时候已经完成了singlton scope的bean的初始化。
 
 
 # Spring Resources
