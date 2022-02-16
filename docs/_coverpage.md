@@ -1,10 +1,10 @@
 ![logo](G:\guides\docs\assets\logo.svg) 
 
-# docsify <small>3.5</small>
+# Bugkit Wiki <small>3.5</small>
 
 
 
-> A magical documentation site generator. 
+> 如果能够帮助到你，是我的荣幸。 
 
 
 
