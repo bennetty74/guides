@@ -1,4 +1,4 @@
-* [Get started](README.md)
+* [Get started](/)
 
 * [Java](Java.md)
 
