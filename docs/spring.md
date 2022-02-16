@@ -335,6 +335,51 @@ Spring是如何解决循环依赖的？
 默认情况下，`ApplicationContext`所管理的bean是singlton scope。
 在初始化的时候已经完成了singlton scope的bean的初始化。
 
+懒加载的意思是在ApplicationContext启动的时候不会立即初始化。
+
+```xml
+<bean id="lazy" class="com.something.ExpensiveToCreateBean" lazy-init="true"/>
+```
+
+不过在懒加载的bean作为非懒加载的bean的以来时，懒加载的bean也会立即被初始化。
+
+
+
+### Autowiring
+
+!> todo 自动装配，byName、byType
+
+
+### Bean的作用域
+
+- singleton 默认的作用域，在IOC容器中只存在一份bean
+- prototype 存在多份bean
+- request 一次http请求就会创建一次
+- session 一次http session就会创建一次
+- application
+- websocket
+
+
+
+### Bean生命周期内的回调
+
+英文名叫`Lifecycle Callbacks`.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Spring Resources
 
