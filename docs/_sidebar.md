@@ -1,7 +1,7 @@
 * [Get started](/)
 
-* [Java](Java.md)
+* [Java](/Java.md)
 
-* [JVM](JVM.md) 
+* [JVM](/JVM.md) 
 
 * [Spring](/spring.md)

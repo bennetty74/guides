@@ -6,6 +6,6 @@
 
 - 喝一口，买个醉。
 
-[Get Started](#bugkit-wiki)
+[Get Started](/README.md)
 
 ![color](#303030)
