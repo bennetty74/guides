@@ -4,8 +4,6 @@
 > 
 > 针对此类型数据库，我将从数据库设计着手，先介绍数据库设计（存储、执行、并发控制、恢复、分布式数据）,接着以MySQL为例子详细介绍MySQL对于以上概念的实现。
 
-
-
 ## 数据库设计
 
 ### 存储
@@ -46,15 +44,11 @@
 
 通常的做法是使用Hash Table创建一个`Page Directoty`
 
-
-
 ##### Page Layout
 
 Page用于存储数据库表的tuples，由`Header`、`Slot Array`和`Tuples`构成。
 
 ![](https://gitee.com/bennetty74/guides/raw/master/imgs/database/page-layout.png)
-
-
 
 `Header`用于存储关于该`Page`的相关元信息。
 
