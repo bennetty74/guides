@@ -1,6 +1,6 @@
 * [Get started](README.md)
 
-* [Java](java.md)
+* [Java](Java.md)
 
 * [JVM](JVM.md) 
 
