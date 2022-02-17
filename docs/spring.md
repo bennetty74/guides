@@ -363,20 +363,65 @@ Spring是如何解决循环依赖的？
 
 ### Bean生命周期内的回调
 
-英文名叫`Lifecycle Callbacks`.
+英文名叫`Lifecycle Callbacks`. 指的是Bean从创建到销毁期间的各种回调事件。
+
+如Spring提供`InitializingBean` 和 `DisposableBean`两个接口。
+
+我们在声明为Spring Bean的时候实现如上两个接口，那么在该Bean在创建完成后会调用`afterPropertiesSet()`，
+在Bean被销毁前调用`destroy()`。
+
+不过Spring更推荐注解的方式声明回调方法。
+
+上述两个接口等同于 `@PostConstruct` 和 `@PreDestroy`标注的方法。
+
+Spring是如何找到并调用我们在Bean中声明的回调方法的。
+
+答案是Spring的内部组件`BeanPostProcessor`. 如果Spring提供的生命周期回掉函数不满足应用场景，我们可以实现`BeanPostProcessor`从而自定义生命周期回调.
+
+
+
+此外，Spring还提供了`Lifecycle`接口,用以监听Bean的启动和关闭事件。
+
+```JAVA
+public interface Lifecycle {
+
+    void start();
+
+    void stop();
+
+    boolean isRunning();
+}
+```
+
+
+### ApplicationContextAware
+
+ApplicationContextAware
+
+如果应用的Bean实现了ApplicationContextAware，那么Spring IOC容器在创建的时候会将ApplicationContext引用传递给该Bean。
+
+```Java
+public interface ApplicationContextAware {
+
+    void setApplicationContext(ApplicationContext applicationContext) throws BeansException;
+}
+
+### 其他Aware接口
+
+- BeanNameAware
+- BeanFactoryAware
+- ...
+```
 
 
 
 
 
+### 基于注解的IOC依赖注入
 
+基于注解的IOC依赖注入优先于XML，所以注解注入的有可能被XML的替换掉。
 
-
-
-
-
-
-
+AutowiredAnnotationBeanPostProcessor负责处理基于注解的Bean生命周期处理。
 
 
 
