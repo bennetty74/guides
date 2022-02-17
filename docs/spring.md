@@ -533,6 +533,127 @@ public class Student{
 
 该注解的处理是组件`CommonAnnotationBeanPostProcessor`负责的。
 
+#### @Value
+
+@Value注解是Spring用来加载外部属性的。
+
+```java
+@Component
+public class MovieRecommender {
+
+    private final String catalog;
+
+    public MovieRecommender(@Value("${catalog.name}") String catalog) {
+        this.catalog = catalog;
+    }
+}
+
+@Configuration
+@PropertySource("classpath:application.properties")
+public class AppConfig { }
+```
+
+application.properties
+```
+catalog.name=MovieCatalog
+```
+
+如果需要配置外部属性
+
+可以注入自定义Bean
+```java
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
+        return new PropertySourcesPlaceholderConfigurer();
+    }
+}
+```
+
+> Spring Boot 默认注入了默认的`PropertySourcesPlaceholderConfigurer`，用来从application.properties或者application.yml中获取属性。
+
+Spring内置了转换器用来将外部文件的属性转换为@Value标注的属性。
+
+如果需要自定义转换器，可以参考如下
+
+```java
+
+```
+
+#### @PostConstruct 和 @PreDestroy
+
+用来标注Bean生命周期的相关周期的回调方法。
+
+### 组件扫描
+
+IOC容器启动时要知道加载哪些Java类作为Spring的Bean，这个查找过程就叫做组件扫描。
+
+前面说过，将Class定义为Spring Bean有两种方式，基于xml和基于Java注解。
+
+其中基于xml的前面已经描述过，此处不再赘述了。
+
+下面讲讲基于Java注解的方式。
+
+#### @Component及其相同注解
+
+被@Component注解标注的类会被作为Spring Bean放入Spring IOC容器中管理。
+
+```java
+@Component("main")
+public class Book1 extends Book{
+
+}
+```
+
+此外，Spring为了区分用途，还做了语义化的注解，作用和@Component注解相同。
+
+分别是@Service @Repository @Controller 
+
+### 自动检测
+
+@ComponentScan注解用来告诉Spring扫描该package及其子package下的类，对于标注为Spring的类会被放在IOC容器中。
+
+@ComponentScan需要标注在@Configuration注解的类上
+
+```java
+@Configuration
+@ComponentScan(basePackages = "org.example")
+public class AppConfig  {
+    // ...
+}
+```
+
+@ComponentScan可以设置过滤器用来过滤扫描类
+```java
+@Configuration
+@ComponentScan(basePackages = "org.example",
+        includeFilters = @Filter(type = FilterType.REGEX, pattern = ".*Stub.*Repository"),
+        excludeFilters = @Filter(Repository.class))
+public class AppConfig {
+    // ...
+}
+```
+
+### IOC容器配置
+
+#### @Configuration 和 @Bean
+
+除开@Component的方式，也可以在@Configuration的类中声明bean
+
+```java
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public MyService myService() {
+        return new MyServiceImpl();
+    }
+}
+```
+
+
 # Spring Resources
 
 # 验证、数据绑定和类型转换
