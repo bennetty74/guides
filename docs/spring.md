@@ -423,8 +423,115 @@ public interface ApplicationContextAware {
 
 AutowiredAnnotationBeanPostProcessor负责处理基于注解的Bean生命周期处理。
 
+#### @Autowired
+
+@Autowired注解用来告诉Spring当前bean依赖于标注体上的Bean.
+
+该注解可以标注在构造器、setter、属性上。
+
+需要注意的是，被注入的bean是根据类型注入的，什么意思呢？
+
+举个例子
+
+Student依赖Book。Book有两种实现Book1和Book2.
+
+此时启动会报错。
+
+```java
+@Component
+public class Student{
+
+    @Autowired
+    private Book book;
 
 
+}
+
+@Component
+public class Book1 extends Book{
+
+}
+@Component
+public class Book2 extends Book{
+
+}
+```
+
+如果我们指定其中一个bean名称为`book`，那么就能正常运行了。
+```java
+@Component("book")
+public class Book2 extends Book{
+
+}
+```
+
+
+另一种方案，使用@Primary注解标注在多个可用bean的情况下优先选择该bean
+```java
+@Primary
+@Component
+public class Book2 extends Book{
+
+}
+```
+
+也可以使用@Qulifier注解注入指定名称的bean,此时注入到Student的是Book1
+```java
+@Component
+public class Student{
+
+    @Autowired
+    @Qulifier("main")
+    private Book book;
+
+
+}
+
+@Component("main")
+public class Book1 extends Book{
+
+}
+
+@Primary
+@Component
+public class Book2 extends Book{
+
+}
+```
+
+
+总结：@Autowired标注的依赖是先根据类型匹配的，如有多个再根据@Qulifier匹配，
+匹配不到再根据@Primary匹配，最后根据类名首字母小写后的bean name与@Autowired标注的属性名或方法名匹配。
+
+
+当然，Spring提供以下方式找到类型相同的bean
+```java
+public class MovieRecommender {
+
+    @Autowired
+    private MovieCatalog[] movieCatalogs;
+
+    // ...
+}
+```
+
+#### @Resource
+
+@Resource注解是JSR 250提供的注解，相比@Autowired的 根据类型查找。
+@Resource是根据name查找的，当@Resource的name属性为空，则表示名称为@Resource标注的字段名。
+
+```java
+@Component
+public class Student{
+
+    @Resource(name = "myBook")
+    private Book book;
+
+
+}
+```
+
+该注解的处理是组件`CommonAnnotationBeanPostProcessor`负责的。
 
 # Spring Resources
 
