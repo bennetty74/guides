@@ -662,5 +662,109 @@ public class AppConfig {
 
 # Spring Aop
 
+AOP是Aspect-oriented Programming的简称，中文意思是面向切面编程。
+
+## 基本概念
+
+- Aspect: 切面，被@Aspect注解标注的类。
+
+- Join Point：切入点，即被切入的方法
+
+- Advice：通知，用来在目标方法上做增强。
+    - Before advice： 前置通知
+    - After returning advice： 后置正常返回通知(目标方法不抛出异常)
+    - After throwing advice：后置异常通知(目标方法抛出异常)
+    - After finally advice: 不管是否抛出异常，方法执行完就会执行该通知。
+    - Around advice: 环绕通知，能够在目标方法执行前后执行的通知。
+
+- Pointcut：切点，用来匹配哪些方法(切入点)要被切入
+
+- Target object：目标对象，即被切面增强的对象。
+
+- AOP Proxy：AOP代理对象，代理对象包含目标对象，用来增强目标对象，从而在目标对象运行前后执行相应的通知。
+
+- Weaving：织入，在编译期间将目标对象和切面链接起来，生成AOP代理对象的过程。
+
+
+## AOP Proxies
+
+AOP针对接口是同的JDK的动态代理；针对类使用CGLIB。
+如果目标类实现了多个接口，Spring AOP使用CGLIB。
+
+如果使用JDK动态代理，只有声明在接口的public方法会被拦截
+
+如果使用CGLIB，public和protected和default的方法会被拦截。
+需要注意final方法无法被AOP，原因在于无法override。
+
+如何开启@Aspect支持,使用@EnableAspectJAutoProxy注解
+```java
+@Configuration
+@EnableAspectJAutoProxy
+public class AppConfig {
+
+}
+```
+
+## AOP例子
+
+@Aspect注解表明该类是个切面
+切面实现了`Ordered`接口，表明在多个切面切入同一个方法的时候，该切面的执行顺序
+@Around注解表明切面有个环绕通知
+Pointcut是`com.xyz.myapp.CommonPointcuts.businessService()`，表明要被代理的方法
+Join point则是com.xyz.myapp.CommonPointcuts类对象的businessService()方法
+doConcurrentOperation(ProceedingJoinPoint pjp)方法是增强逻辑。增加逻辑是用来多次尝试获取锁，并将未达到最大尝试次数的异常拦截下来，避免中途抛出异常给其他调用者。
+
+
+```java
+
+@Aspect
+public class ConcurrentOperationExecutor implements Ordered {
+
+    private static final int DEFAULT_MAX_RETRIES = 2;
+
+    private int maxRetries = DEFAULT_MAX_RETRIES;
+    private int order = 1;
+
+    public void setMaxRetries(int maxRetries) {
+        this.maxRetries = maxRetries;
+    }
+
+    public int getOrder() {
+        return this.order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    @Around("com.xyz.myapp.CommonPointcuts.businessService()")
+    public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
+        int numAttempts = 0;
+        PessimisticLockingFailureException lockFailureException;
+        do {
+            numAttempts++;
+            try {
+                return pjp.proceed();
+            }
+            catch(PessimisticLockingFailureException ex) {
+                lockFailureException = ex;
+            }
+        } while(numAttempts <= this.maxRetries);
+        throw lockFailureException;
+    }
+}
+```
+
+## AOP 原理
+
+Calling code叫做客户端，他需要调用被代理(pojo)的foo()方法。
+
+它首先调用的不是pojo.foo()，而是调用代理对象(proxy)的foo()方法。 
+
+代理对象(proxy)此时就可以根据前置后置还是环绕等顺序调用我们的通知方法，最后调用被代理对象的foo()方法，并将结果返回给客户端。
+
+
+![](https://docs.spring.io/spring-framework/docs/current/reference/html/images/aop-proxy-call.png)
+
 # 空安全
 
