@@ -768,3 +768,153 @@ Calling code叫做客户端，他需要调用被代理(pojo)的foo()方法。
 
 # 空安全
 
+
+# 事务管理
+
+事务管理英文全称为Transaction Management
+
+核心组件是`TransactionManager`。
+
+事务管理分为声明式事务管理和编程式事务管理。
+
+## 声明式事物
+
+AOP的出现使得声明式事务管理成为可能。
+
+`TransactionInterceptor`是Spring提供的一个切面，用来管理声明式事物的。
+
+它会切入标注了@Transactional注解的方法，执行内置的通知方法，从而完成事务管理。
+
+下图是官网给出的内部实现逻辑
+
+![](https://docs.spring.io/spring-framework/docs/current/reference/html/images/tx.png)
+
+
+### 例子
+
+- 被事务管理的Bean
+```java
+public class DefaultFooService implements FooService {
+
+    @Override
+    public Foo getFoo(String fooName) {
+        // ...
+    }
+
+    @Override
+    public Foo getFoo(String fooName, String barName) {
+        // ...
+    }
+
+    @Override
+    public void insertFoo(Foo foo) {
+        // ...
+    }
+
+    @Override
+    public void updateFoo(Foo foo) {
+        // ...
+    }
+}
+
+public final class Boot {
+
+    public static void main(final String[] args) throws Exception {
+        ApplicationContext ctx = new ClassPathXmlApplicationContext("context.xml");
+        FooService fooService = ctx.getBean(FooService.class);
+        fooService.insertFoo(new Foo());
+    }
+}
+```
+
+`context.xml`，Bean配置和事务管理配置
+
+```xml
+<!-- from the file 'context.xml' -->
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/tx
+        https://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop
+        https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!-- this is the service object that we want to make transactional -->
+    <bean id="fooService" class="x.y.service.DefaultFooService"/>
+
+    <!-- the transactional advice (what 'happens'; see the <aop:advisor/> bean below) -->
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <!-- the transactional semantics... -->
+        <tx:attributes>
+            <!--所有get开头的额方法配置为只读-->
+            <tx:method name="get*" read-only="true"/>
+            <!--配置出现什么异常才回滚事务-->
+            <tx:method name="get*" read-only="true" rollback-for="NoProductInStockException"/>
+            <!-- other methods use the default transaction settings (see below) -->
+            <tx:method name="*"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!-- ensure that the above transactional advice runs for any execution
+        of an operation defined by the FooService interface -->
+    <aop:config>
+        <aop:pointcut id="fooServiceOperation" expression="execution(* x.y.service.FooService.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="fooServiceOperation"/>
+    </aop:config>
+
+    <!-- don't forget the DataSource -->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
+        <property name="url" value="jdbc:oracle:thin:@rj-t42:1521:elvis"/>
+        <property name="username" value="scott"/>
+        <property name="password" value="tiger"/>
+    </bean>
+
+    <!-- similarly, don't forget the TransactionManager -->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- other <bean/> definitions here -->
+
+</beans>
+```
+
+上述xml例子等同于使用@Transactional注解.
+
+DefaultFooService及其子类都会被Spring的事务管理器所管理。
+
+```java
+@Service
+@Transactional
+public class DefaultFooService implements FooService {
+
+    @Override
+    public Foo getFoo(String fooName) {
+        // ...
+    }
+
+    @Override
+    public Foo getFoo(String fooName, String barName) {
+        // ...
+    }
+
+    @Override
+    public void insertFoo(Foo foo) {
+        // ...
+    }
+
+    @Override
+    public void updateFoo(Foo foo) {
+        // ...
+    }
+}
+```
+
+!> 注意，Spring声明式的事物是基于AOP的，也就是说如果目标对象自调用内部方法，则不会被事物管理器所管理。
+
