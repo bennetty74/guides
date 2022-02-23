@@ -363,22 +363,295 @@ Spring是如何解决循环依赖的？
 
 ### Bean生命周期内的回调
 
-英文名叫`Lifecycle Callbacks`.
+英文名叫`Lifecycle Callbacks`. 指的是Bean从创建到销毁期间的各种回调事件。
+
+如Spring提供`InitializingBean` 和 `DisposableBean`两个接口。
+
+我们在声明为Spring Bean的时候实现如上两个接口，那么在该Bean在创建完成后会调用`afterPropertiesSet()`，
+在Bean被销毁前调用`destroy()`。
+
+不过Spring更推荐注解的方式声明回调方法。
+
+上述两个接口等同于 `@PostConstruct` 和 `@PreDestroy`标注的方法。
+
+Spring是如何找到并调用我们在Bean中声明的回调方法的。
+
+答案是Spring的内部组件`BeanPostProcessor`. 如果Spring提供的生命周期回掉函数不满足应用场景，我们可以实现`BeanPostProcessor`从而自定义生命周期回调.
+
+
+
+此外，Spring还提供了`Lifecycle`接口,用以监听Bean的启动和关闭事件。
+
+```JAVA
+public interface Lifecycle {
+
+    void start();
+
+    void stop();
+
+    boolean isRunning();
+}
+```
+
+
+### ApplicationContextAware
+
+ApplicationContextAware
+
+如果应用的Bean实现了ApplicationContextAware，那么Spring IOC容器在创建的时候会将ApplicationContext引用传递给该Bean。
+
+```Java
+public interface ApplicationContextAware {
+
+    void setApplicationContext(ApplicationContext applicationContext) throws BeansException;
+}
+
+### 其他Aware接口
+
+- BeanNameAware
+- BeanFactoryAware
+- ...
+```
 
 
 
 
 
+### 基于注解的IOC依赖注入
+
+基于注解的IOC依赖注入优先于XML，所以注解注入的有可能被XML的替换掉。
+
+AutowiredAnnotationBeanPostProcessor负责处理基于注解的Bean生命周期处理。
+
+#### @Autowired
+
+@Autowired注解用来告诉Spring当前bean依赖于标注体上的Bean.
+
+该注解可以标注在构造器、setter、属性上。
+
+需要注意的是，被注入的bean是根据类型注入的，什么意思呢？
+
+举个例子
+
+Student依赖Book。Book有两种实现Book1和Book2.
+
+此时启动会报错。
+
+```java
+@Component
+public class Student{
+
+    @Autowired
+    private Book book;
 
 
+}
+
+@Component
+public class Book1 extends Book{
+
+}
+@Component
+public class Book2 extends Book{
+
+}
+```
+
+如果我们指定其中一个bean名称为`book`，那么就能正常运行了。
+```java
+@Component("book")
+public class Book2 extends Book{
+
+}
+```
 
 
+另一种方案，使用@Primary注解标注在多个可用bean的情况下优先选择该bean
+```java
+@Primary
+@Component
+public class Book2 extends Book{
+
+}
+```
+
+也可以使用@Qulifier注解注入指定名称的bean,此时注入到Student的是Book1
+```java
+@Component
+public class Student{
+
+    @Autowired
+    @Qulifier("main")
+    private Book book;
 
 
+}
+
+@Component("main")
+public class Book1 extends Book{
+
+}
+
+@Primary
+@Component
+public class Book2 extends Book{
+
+}
+```
 
 
+总结：@Autowired标注的依赖是先根据类型匹配的，如有多个再根据@Qulifier匹配，
+匹配不到再根据@Primary匹配，最后根据类名首字母小写后的bean name与@Autowired标注的属性名或方法名匹配。
 
 
+当然，Spring提供以下方式找到类型相同的bean
+```java
+public class MovieRecommender {
+
+    @Autowired
+    private MovieCatalog[] movieCatalogs;
+
+    // ...
+}
+```
+
+#### @Resource
+
+@Resource注解是JSR 250提供的注解，相比@Autowired的 根据类型查找。
+@Resource是根据name查找的，当@Resource的name属性为空，则表示名称为@Resource标注的字段名。
+
+```java
+@Component
+public class Student{
+
+    @Resource(name = "myBook")
+    private Book book;
+
+
+}
+```
+
+该注解的处理是组件`CommonAnnotationBeanPostProcessor`负责的。
+
+#### @Value
+
+@Value注解是Spring用来加载外部属性的。
+
+```java
+@Component
+public class MovieRecommender {
+
+    private final String catalog;
+
+    public MovieRecommender(@Value("${catalog.name}") String catalog) {
+        this.catalog = catalog;
+    }
+}
+
+@Configuration
+@PropertySource("classpath:application.properties")
+public class AppConfig { }
+```
+
+application.properties
+```
+catalog.name=MovieCatalog
+```
+
+如果需要配置外部属性
+
+可以注入自定义Bean
+```java
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
+        return new PropertySourcesPlaceholderConfigurer();
+    }
+}
+```
+
+> Spring Boot 默认注入了默认的`PropertySourcesPlaceholderConfigurer`，用来从application.properties或者application.yml中获取属性。
+
+Spring内置了转换器用来将外部文件的属性转换为@Value标注的属性。
+
+如果需要自定义转换器，可以参考如下
+
+```java
+
+```
+
+#### @PostConstruct 和 @PreDestroy
+
+用来标注Bean生命周期的相关周期的回调方法。
+
+### 组件扫描
+
+IOC容器启动时要知道加载哪些Java类作为Spring的Bean，这个查找过程就叫做组件扫描。
+
+前面说过，将Class定义为Spring Bean有两种方式，基于xml和基于Java注解。
+
+其中基于xml的前面已经描述过，此处不再赘述了。
+
+下面讲讲基于Java注解的方式。
+
+#### @Component及其相同注解
+
+被@Component注解标注的类会被作为Spring Bean放入Spring IOC容器中管理。
+
+```java
+@Component("main")
+public class Book1 extends Book{
+
+}
+```
+
+此外，Spring为了区分用途，还做了语义化的注解，作用和@Component注解相同。
+
+分别是@Service @Repository @Controller 
+
+### 自动检测
+
+@ComponentScan注解用来告诉Spring扫描该package及其子package下的类，对于标注为Spring的类会被放在IOC容器中。
+
+@ComponentScan需要标注在@Configuration注解的类上
+
+```java
+@Configuration
+@ComponentScan(basePackages = "org.example")
+public class AppConfig  {
+    // ...
+}
+```
+
+@ComponentScan可以设置过滤器用来过滤扫描类
+```java
+@Configuration
+@ComponentScan(basePackages = "org.example",
+        includeFilters = @Filter(type = FilterType.REGEX, pattern = ".*Stub.*Repository"),
+        excludeFilters = @Filter(Repository.class))
+public class AppConfig {
+    // ...
+}
+```
+
+### IOC容器配置
+
+#### @Configuration 和 @Bean
+
+除开@Component的方式，也可以在@Configuration的类中声明bean
+
+```java
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public MyService myService() {
+        return new MyServiceImpl();
+    }
+}
+```
 
 
 # Spring Resources
@@ -389,5 +662,259 @@ Spring是如何解决循环依赖的？
 
 # Spring Aop
 
+AOP是Aspect-oriented Programming的简称，中文意思是面向切面编程。
+
+## 基本概念
+
+- Aspect: 切面，被@Aspect注解标注的类。
+
+- Join Point：切入点，即被切入的方法
+
+- Advice：通知，用来在目标方法上做增强。
+    - Before advice： 前置通知
+    - After returning advice： 后置正常返回通知(目标方法不抛出异常)
+    - After throwing advice：后置异常通知(目标方法抛出异常)
+    - After finally advice: 不管是否抛出异常，方法执行完就会执行该通知。
+    - Around advice: 环绕通知，能够在目标方法执行前后执行的通知。
+
+- Pointcut：切点，用来匹配哪些方法(切入点)要被切入
+
+- Target object：目标对象，即被切面增强的对象。
+
+- AOP Proxy：AOP代理对象，代理对象包含目标对象，用来增强目标对象，从而在目标对象运行前后执行相应的通知。
+
+- Weaving：织入，在编译期间将目标对象和切面链接起来，生成AOP代理对象的过程。
+
+
+## AOP Proxies
+
+AOP针对接口是同的JDK的动态代理；针对类使用CGLIB。
+如果目标类实现了多个接口，Spring AOP使用CGLIB。
+
+如果使用JDK动态代理，只有声明在接口的public方法会被拦截
+
+如果使用CGLIB，public和protected和default的方法会被拦截。
+需要注意final方法无法被AOP，原因在于无法override。
+
+如何开启@Aspect支持,使用@EnableAspectJAutoProxy注解
+```java
+@Configuration
+@EnableAspectJAutoProxy
+public class AppConfig {
+
+}
+```
+
+## AOP例子
+
+@Aspect注解表明该类是个切面
+切面实现了`Ordered`接口，表明在多个切面切入同一个方法的时候，该切面的执行顺序
+@Around注解表明切面有个环绕通知
+Pointcut是`com.xyz.myapp.CommonPointcuts.businessService()`，表明要被代理的方法
+Join point则是com.xyz.myapp.CommonPointcuts类对象的businessService()方法
+doConcurrentOperation(ProceedingJoinPoint pjp)方法是增强逻辑。增加逻辑是用来多次尝试获取锁，并将未达到最大尝试次数的异常拦截下来，避免中途抛出异常给其他调用者。
+
+
+```java
+
+@Aspect
+public class ConcurrentOperationExecutor implements Ordered {
+
+    private static final int DEFAULT_MAX_RETRIES = 2;
+
+    private int maxRetries = DEFAULT_MAX_RETRIES;
+    private int order = 1;
+
+    public void setMaxRetries(int maxRetries) {
+        this.maxRetries = maxRetries;
+    }
+
+    public int getOrder() {
+        return this.order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    @Around("com.xyz.myapp.CommonPointcuts.businessService()")
+    public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
+        int numAttempts = 0;
+        PessimisticLockingFailureException lockFailureException;
+        do {
+            numAttempts++;
+            try {
+                return pjp.proceed();
+            }
+            catch(PessimisticLockingFailureException ex) {
+                lockFailureException = ex;
+            }
+        } while(numAttempts <= this.maxRetries);
+        throw lockFailureException;
+    }
+}
+```
+
+## AOP 原理
+
+Calling code叫做客户端，他需要调用被代理(pojo)的foo()方法。
+
+它首先调用的不是pojo.foo()，而是调用代理对象(proxy)的foo()方法。 
+
+代理对象(proxy)此时就可以根据前置后置还是环绕等顺序调用我们的通知方法，最后调用被代理对象的foo()方法，并将结果返回给客户端。
+
+
+![](https://docs.spring.io/spring-framework/docs/current/reference/html/images/aop-proxy-call.png)
+
 # 空安全
+
+
+# 事务管理
+
+事务管理英文全称为Transaction Management
+
+核心组件是`TransactionManager`。
+
+事务管理分为声明式事务管理和编程式事务管理。
+
+## 声明式事物
+
+AOP的出现使得声明式事务管理成为可能。
+
+`TransactionInterceptor`是Spring提供的一个切面，用来管理声明式事物的。
+
+它会切入标注了@Transactional注解的方法，执行内置的通知方法，从而完成事务管理。
+
+下图是官网给出的内部实现逻辑
+
+![](https://docs.spring.io/spring-framework/docs/current/reference/html/images/tx.png)
+
+
+### 例子
+
+- 被事务管理的Bean
+```java
+public class DefaultFooService implements FooService {
+
+    @Override
+    public Foo getFoo(String fooName) {
+        // ...
+    }
+
+    @Override
+    public Foo getFoo(String fooName, String barName) {
+        // ...
+    }
+
+    @Override
+    public void insertFoo(Foo foo) {
+        // ...
+    }
+
+    @Override
+    public void updateFoo(Foo foo) {
+        // ...
+    }
+}
+
+public final class Boot {
+
+    public static void main(final String[] args) throws Exception {
+        ApplicationContext ctx = new ClassPathXmlApplicationContext("context.xml");
+        FooService fooService = ctx.getBean(FooService.class);
+        fooService.insertFoo(new Foo());
+    }
+}
+```
+
+`context.xml`，Bean配置和事务管理配置
+
+```xml
+<!-- from the file 'context.xml' -->
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/tx
+        https://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop
+        https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!-- this is the service object that we want to make transactional -->
+    <bean id="fooService" class="x.y.service.DefaultFooService"/>
+
+    <!-- the transactional advice (what 'happens'; see the <aop:advisor/> bean below) -->
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <!-- the transactional semantics... -->
+        <tx:attributes>
+            <!--所有get开头的额方法配置为只读-->
+            <tx:method name="get*" read-only="true"/>
+            <!--配置出现什么异常才回滚事务-->
+            <tx:method name="get*" read-only="true" rollback-for="NoProductInStockException"/>
+            <!-- other methods use the default transaction settings (see below) -->
+            <tx:method name="*"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!-- ensure that the above transactional advice runs for any execution
+        of an operation defined by the FooService interface -->
+    <aop:config>
+        <aop:pointcut id="fooServiceOperation" expression="execution(* x.y.service.FooService.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="fooServiceOperation"/>
+    </aop:config>
+
+    <!-- don't forget the DataSource -->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
+        <property name="url" value="jdbc:oracle:thin:@rj-t42:1521:elvis"/>
+        <property name="username" value="scott"/>
+        <property name="password" value="tiger"/>
+    </bean>
+
+    <!-- similarly, don't forget the TransactionManager -->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- other <bean/> definitions here -->
+
+</beans>
+```
+
+上述xml例子等同于使用@Transactional注解.
+
+DefaultFooService及其子类都会被Spring的事务管理器所管理。
+
+```java
+@Service
+@Transactional
+public class DefaultFooService implements FooService {
+
+    @Override
+    public Foo getFoo(String fooName) {
+        // ...
+    }
+
+    @Override
+    public Foo getFoo(String fooName, String barName) {
+        // ...
+    }
+
+    @Override
+    public void insertFoo(Foo foo) {
+        // ...
+    }
+
+    @Override
+    public void updateFoo(Foo foo) {
+        // ...
+    }
+}
+```
+
+!> 注意，Spring声明式的事物是基于AOP的，也就是说如果目标对象自调用内部方法，则不会被事物管理器所管理。
 
