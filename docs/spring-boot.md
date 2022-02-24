@@ -24,8 +24,6 @@ public class MyApplication {
     }
 
 }
-
-
 ```
 
 ### 1.1 启动失败
@@ -66,8 +64,6 @@ logging.level.org.springframework.web=debug
 logging.level.org.hibernate=error
 ```
 
-
-
 ### 1.2 延迟初始化
 
 延迟初始化指的是SpringBoot应用启动时是否同时将Spring Bean初始化完成。
@@ -86,13 +82,9 @@ spring.main.lazy-initialization=true
 
 - SpringApplicationBuilder.lazyInitialization()
 
-
-
 如果只想取消部分Spring Bean延迟初始化，可以在对应的bean上加上注解
 
 `@Lazy(false)` 
-
-
 
 ### 1.3 自定义Banner
 
@@ -114,14 +106,11 @@ spring.banner.image.location
 
 - SpringApplication.setBanner()设置banner，需要实现Banner接口并实现printBanner()方法
 
-
-
 ### 1.4 自定义SpringApplication
 
 如果静态的`SpringApplication.run()`方法无法满足我们的需求，可以创建SpringApplication实例，动态设置相关属性。比如关闭`Banner` 
 
 ```java
-
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -153,17 +142,11 @@ new SpringApplicationBuilder()
 
 ### 1.5 应用的可用性
 
-
-
 ### 1.6 应用的事件和监听器
 
 在Spring Boot应用的启动过程中，会有很多的事件发生，而监听器则负责监听对应的事件和处理。
 
-
-
 可以通过`SpringApplication.addListeners()` 或 `SpringApplicationBuilder.listeners()`注册监听器
-
-
 
 如果需要在应用没启动的时候自动注册监听器，可以添加文件`META-INF/spring.factories`，内容如下：
 
@@ -171,8 +154,6 @@ new SpringApplicationBuilder()
 org.springframework.context.ApplicationListener
             = com.example.project.MyListener
 ```
-
-
 
 以下是应用事件的分发顺序：
 
@@ -198,8 +179,6 @@ org.springframework.context.ApplicationListener
 
 - ApplicationFailedEvent
 
-
-
 ### 1.7 Web 环境
 
 SpringApplication在启动时会创建对应的ApplicationContext. 对应的算法如下：
@@ -214,8 +193,6 @@ SpringApplication在启动时会创建对应的ApplicationContext. 对应的算�
 
 或者完全设置上下文类型`setApplicationContextClass`
 
-
-
 ### 1.8 访问启动参数
 
 如果需要应用的启动参数`SpringApplication.run(args)`，可以在自己定义的Bean中传入`ApplicationArguments`对象
@@ -225,7 +202,7 @@ SpringApplication在启动时会创建对应的ApplicationContext. 对应的算�
 public class MyBean {
 
     public MyBean(ApplicationArguments args) {
-        
+
     }
 
 }
@@ -266,19 +243,13 @@ public class MyApplication {
     }
 
 }
-
-
 ```
 
 ## 额外配置
 
-
-
 ## Profile
 
 profile用于应用配置的区分，可以通过配置文件的方式设置，也可以通过编程的方式设置。
-
-
 
 设置生产环境的配置
 
@@ -302,25 +273,17 @@ public class DevConfiguration {
 }
 ```
 
-
-
 然后通过配置文件选择使用的环境配置,如下使用dev、hsqldb的环境配置
 
 ```properties
 spring.profiles.active=dev,hsqldb
 ```
 
-
-
 ## 日志
 
 SpringBoot使用Commons Logging作为内部的日志记录接口，具体实现包括LOG4J、LOGBACK.
 
-
-
 在使用starter的情况下，Logback是默认的日志输出实现。
-
-
 
 ### 日志格式
 
@@ -348,8 +311,6 @@ $ java -jar myapp.jar --debug
 
 也可以在`pplication.properties`件中设置`debug=true`
 
-
-
 带颜色的日志输出
 
 如果终端支持ANSI颜色支持，我们可以在配置日志格式的时候配置日志颜色
@@ -357,8 +318,6 @@ $ java -jar myapp.jar --debug
 ```
 %clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){yellow}
 ```
-
-
 
 #### 文件输出
 
@@ -374,13 +333,9 @@ logging.file.name=my_log_file.txt
 logging.file.path = /path/to/log/
 ```
 
-
-
 ### 日志级别
 
 日志级别从详细到简单分为：`TRACE` `DEBUG` `INFO` `WARN` `ERROR` `FATAL`
-
-
 
 可以根据如下方式指定日志级别
 
@@ -404,25 +359,13 @@ logging.group.tomcat=org.apache.catalina,org.apache.coyote,org.apache.tomcat
 logging.level.tomcat=trace
 ```
 
-
-
 ### 自定义日志配置
-
-
-
-
 
 ## 国际化
 
-
-
 ## JSON
 
-
-
 JSON是序列化的有效工具之一。主要用来将Java对象转为JSON字符串，或者反之。
-
-
 
 Spring boot集成了如下三种JSON库
 
@@ -432,27 +375,15 @@ Spring boot集成了如下三种JSON库
 
 - JSON-B
 
-
-
 Jackson使用ObjectMapper作为Java对象序列化和反序列化的工具。
 
 关于如何自定义序列化，可参考如下来链接
 
 > todo 待补充
 
-
-
-
-
 ## 任务执行和调度
 
-
-
-
-
 ## 测试
-
-
 
 ## 自动配置
 
