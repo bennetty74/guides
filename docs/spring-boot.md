@@ -52,7 +52,7 @@ Identify and stop the process that is listening on port 8080 or configure this a
 
 如启动时设置界别
 
-```shell
+```bash
 java -jar myproject-0.0.1-SNAPSHOT.jar --debug
 ```
 
@@ -386,5 +386,3 @@ Jackson使用ObjectMapper作为Java对象序列化和反序列化的工具。
 ## 测试
 
 ## 自动配置
-
-

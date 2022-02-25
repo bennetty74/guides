@@ -1,7 +1,5 @@
 # 
 
-
-
 > 为什么需要了解JVM
 > 
 > - 了解我们的Java代码是怎么运行的
@@ -9,8 +7,6 @@
 > - 了解JVM是怎样自动管理内存放入
 > 
 > - 能够理解并定位JVM抛出的相关错误源头并修复
-
-
 
 # 我们的Java代码是怎么运行的？
 
@@ -34,13 +30,9 @@ main.java  ===>  javac main.java  ===>  main.class
 
 此处`JVM`做了两件事情：
 
-
-
 - 加载class文件到JVM内部（类加载）
 
 - 解释执行字节码文件（解释执行）
-
-
 
 了解`.class`文件(以下均称为**Class文件**)是如何被`JVM`执行之前，我们先来看看`JVM`的整体架构，方便理解后面提到的名词。
 
@@ -64,8 +56,6 @@ main.java  ===>  javac main.java  ===>  main.class
 
 - **Execution Engine(执行引擎)**： 用于将**Class文件**翻译成机器指令并执行。
 
-
-
 ## 读取class文件（类加载）
 
 读取Class文件的过程就是`JVM`将磁盘上的`Class`文件加载到内存并初始化的过程。该加载过程大致分为 `加载` `链接` 和`初始化`
@@ -82,7 +72,7 @@ main.java  ===>  javac main.java  ===>  main.class
 
 - 第一步操作是将.class文件的字节流加载到方法区(元空间)
 
--  第二步则是根据字节流生成`java.lang.Class`对象
+- 第二步则是根据字节流生成`java.lang.Class`对象
 
 在JDK的默认实现中，`Class文件`加载存在委托行为(逐级委托给上级加载.class文件，如果上级无法加载，则有自己加载)，即常说的`双亲委派模型`。
 
@@ -98,19 +88,11 @@ main.java  ===>  javac main.java  ===>  main.class
 - **Extension ClassLoader**:  负责加载`$JAVA_HOME/jre/lib/ext`目录下的类.Classloader具体是`sun.misc.Launcher$ExtClassLoader`
 - **Application ClassLoader**:  负责加载`JVM`参数`-cp`或者`--classpath`命令指定路径下的类。**Classloader**具体是`sun.misc.Launcher$AppClassLoader`
 
-
-
 **为什么设计双亲委派模型？**
-
-
 
 一定程度上是基于安全考虑我们可以考虑如下的场景：
 
-
-
 > 我们自己应用内部创建了与`java.lang.String`全限定名相同的String类
-
-
 
 在这样的场景下，由于双亲委派模型的出现，从而避免了从外部加载全限定名一样的同名类，保护JVM安全。
 
@@ -170,23 +152,15 @@ public static int a = 1;
 
 解析阶段主要是将类中的符号引用转变为直接引用的过程。
 
-
 **什么是符号引用？** 
-
-
 
 比如`java.lang.String` 就是符号引用，是字面上的引用。而直接引用就是该类型信息在JVM内部的内存地址。
 
-
 **为什么需要解析成直接引用？**
-
 
 对于符号引用，我们只知道它的全限定名，但是对于该类型的方法、属性我们无从知晓，所以需要转变为直接引用通过在JVM内存地址中拿到类的信息。
 
-
-
 **怎样将符号引用转为直接引用呢？** 
-
 
 答案是通过搜索方法区完成的。加载阶段我们知道，类的全限定名和字节流数据都存储在方法区，所以可以通过全限定名就找到类的信息了。
 
@@ -208,8 +182,6 @@ public static int a = 1;
 该阶段主要将读入到内存的Class内容(字节码)翻译成机器指令执行，具体执行过程由执行引擎负责。
 
 执行引擎包含三个组件：**Interpreter(解释器)**、**Just-In-Time Compiler(JIT，即时编译器)**、**Garbage Collector(垃圾收集器)**。
-
-
 
 ### Interpreter(解释器)
 
@@ -354,8 +326,6 @@ Major GC指的是老年代中的死亡对象被回收的过程。
 
 - ZGC：追求响应时间，或者使用超大堆。
 
-
-
 ## 附录
 
 #### Java Native Interface(JNI)
@@ -375,7 +345,5 @@ public String getHardwareInfo(){
 
 最后将cpp代码编译成.dll或.so文件，使用System.loadLibrary()加载。
 最后就可以在java代码中调用native方法了。
-
-
 
 ## 引用
