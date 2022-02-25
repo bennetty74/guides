@@ -1,8 +1,8 @@
-* [Get started](/)
+* [关于](/README.md)
 
-* [Java](/Java.md)
+* [Java基础](/Java.md)
 
-* [JVM](/JVM.md) 
+* [Java虚拟机](/JVM.md) 
 
 * [Spring](/spring.md)
 
