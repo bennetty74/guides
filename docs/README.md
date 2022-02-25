@@ -18,7 +18,7 @@
 
 一无所知程序员，勤勤恳恳打工人。
 
-- [Github]([bennetty74 (bugkit) · GitHub](https://github.com/bennetty74)) 
+- [GitHub](https://github.com/bennetty74) 
 
 - [知乎](https://www.zhihu.com/people/lb.bupt.sse) 
 
