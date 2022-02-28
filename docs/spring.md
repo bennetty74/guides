@@ -11,6 +11,7 @@ Ioc具体意思如下：
 举个例子：
 
 原方式
+
 ```java
 public class Student{
 
@@ -67,6 +68,7 @@ public class Book{
 负责存储Spring创建对象的容器叫做Ioc容器(`BeanFactory`和`ApplicationContext`)，创建的对象在Spring中被声明为`BeanDefinition`.
 
 ## 1.2 Ioc容器
+
 在Spring中，核心的IOC容器有以下两种，分别是`BeanFactory`和`ApplicationContext`。
 IOC容器负责`bean`的初始化、配置和装配
 
@@ -74,7 +76,6 @@ IOC容器负责`bean`的初始化、配置和装配
 
 `BeanFactory`作为存储`BeanDefinition`的基础容器，主要存储了如下对象的信息。
 !> todo，补充描述信息
-
 
 ### 1.2.2 ApplicationContext
 
@@ -93,7 +94,9 @@ IOC容器负责`bean`的初始化、配置和装配
 - ...
 
 #### XML方式
+
 以下是声明bean的xml文件结构，其中id用于唯一标识bean，class指定bean的类型。
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -122,7 +125,6 @@ IOC容器负责`bean`的初始化、配置和装配
 
 如`Student`例子所示。
 
-
 ### 1.2.3 使用IOC容器
 
 ```java
@@ -133,7 +135,6 @@ Student student = context.getBean("student", Student.class);
 // 使用bean
 student.readBook();
 ```
-
 
 ## 1.3 BeanDefinition
 
@@ -161,22 +162,23 @@ BeanDefinition包含如下bean的信息：
 
 此外还可以在声明为Spring Bean的类方法上使用`@Bean`，表示该方法的返回值会作为Spring Bean，bean的名称则是方法名。
 
-
-
 ### 1.3.1 Bean的初始化
 
 Bean的初始化指的是创建bean对象的过程。初始化bean有如下几种方式：
 
 - 使用构造器
-```xml
-<bean id="exampleBean" class="examples.ExampleBean"/>
-```
-按照如上声明的bean，Spring IOC容器在创建bean对象时是通过反射调用bean的构造方法创建的对象。
+  
+  ```xml
+  <bean id="exampleBean" class="examples.ExampleBean"/>
+  ```
+  
+  按照如上声明的bean，Spring IOC容器在创建bean对象时是通过反射调用bean的构造方法创建的对象。
 
 - 使用静态工厂方法
-```xml
-<bean id="clientService" class="examples.ClientService" factory-method="createInstance"/>
-```
+  
+  ```xml
+  <bean id="clientService" class="examples.ClientService" factory-method="createInstance"/>
+  ```
 
 ```java
 public class ClientService {
@@ -215,6 +217,7 @@ public class DefaultServiceLocator {
 依赖注入英文全称为`Dependency Injection`，指的是将类属性所需要的bean通过反射的方式创建并复制给类属性的过程中。
 
 如下Student类的book成员的初始化的过程就是依赖注入的过程中.
+
 ```java
 @Component
 public class Student{
@@ -247,17 +250,18 @@ public class Book{
 ```java
 public class SimpleMovieLister {
 
-    
+
     private final MovieFinder movieFinder;
 
-    
+
     public SimpleMovieLister(MovieFinder movieFinder) {
         this.movieFinder = movieFinder;
     }
-  
+
     // ...
 }
 ```
+
 !> todo 如何确定使用那个构造器？
 
 #### 基于Setter注入
@@ -276,11 +280,11 @@ public class SimpleMovieLister {
     // ...
 }
 ```
+
 **如何选择注入方式**
 在Spring官网文档说道，必须的依赖建议通过构造器注入，可选的通过setter注入。
 
 ### 依赖注入的解析过程
-
 
 #### 循环依赖
 
@@ -291,6 +295,7 @@ public class SimpleMovieLister {
 A依赖B，B依赖A。或A依赖B、B依赖C、C依赖A。等等。
 在这种情况下，A的构造需要等待B构造，B构造又需要等待A构造，从而导致A、B无法完成初始化。
 例子: 
+
 ```java
 public class A{
 
@@ -308,7 +313,6 @@ public class B{
         this.a = a;
     }
 }
-
 ```
 
 如何解决循环依赖?
@@ -343,12 +347,9 @@ Spring是如何解决循环依赖的？
 
 不过在懒加载的bean作为非懒加载的bean的以来时，懒加载的bean也会立即被初始化。
 
-
-
 ### Autowiring
 
 !> todo 自动装配，byName、byType
-
 
 ### Bean的作用域
 
@@ -358,8 +359,6 @@ Spring是如何解决循环依赖的？
 - session 一次http session就会创建一次
 - application
 - websocket
-
-
 
 ### Bean生命周期内的回调
 
@@ -378,8 +377,6 @@ Spring是如何找到并调用我们在Bean中声明的回调方法的。
 
 答案是Spring的内部组件`BeanPostProcessor`. 如果Spring提供的生命周期回掉函数不满足应用场景，我们可以实现`BeanPostProcessor`从而自定义生命周期回调.
 
-
-
 此外，Spring还提供了`Lifecycle`接口,用以监听Bean的启动和关闭事件。
 
 ```JAVA
@@ -392,7 +389,6 @@ public interface Lifecycle {
     boolean isRunning();
 }
 ```
-
 
 ### ApplicationContextAware
 
@@ -412,10 +408,6 @@ public interface ApplicationContextAware {
 - BeanFactoryAware
 - ...
 ```
-
-
-
-
 
 ### 基于注解的IOC依赖注入
 
@@ -458,6 +450,7 @@ public class Book2 extends Book{
 ```
 
 如果我们指定其中一个bean名称为`book`，那么就能正常运行了。
+
 ```java
 @Component("book")
 public class Book2 extends Book{
@@ -465,8 +458,8 @@ public class Book2 extends Book{
 }
 ```
 
-
 另一种方案，使用@Primary注解标注在多个可用bean的情况下优先选择该bean
+
 ```java
 @Primary
 @Component
@@ -476,6 +469,7 @@ public class Book2 extends Book{
 ```
 
 也可以使用@Qulifier注解注入指定名称的bean,此时注入到Student的是Book1
+
 ```java
 @Component
 public class Student{
@@ -499,12 +493,11 @@ public class Book2 extends Book{
 }
 ```
 
-
 总结：@Autowired标注的依赖是先根据类型匹配的，如有多个再根据@Qulifier匹配，
 匹配不到再根据@Primary匹配，最后根据类名首字母小写后的bean name与@Autowired标注的属性名或方法名匹配。
 
-
 当然，Spring提供以下方式找到类型相同的bean
+
 ```java
 public class MovieRecommender {
 
@@ -554,6 +547,7 @@ public class AppConfig { }
 ```
 
 application.properties
+
 ```
 catalog.name=MovieCatalog
 ```
@@ -561,6 +555,7 @@ catalog.name=MovieCatalog
 如果需要配置外部属性
 
 可以注入自定义Bean
+
 ```java
 @Configuration
 public class AppConfig {
@@ -626,6 +621,7 @@ public class AppConfig  {
 ```
 
 @ComponentScan可以设置过滤器用来过滤扫描类
+
 ```java
 @Configuration
 @ComponentScan(basePackages = "org.example",
@@ -653,7 +649,6 @@ public class AppConfig {
 }
 ```
 
-
 # Spring Resources
 
 # 验证、数据绑定和类型转换
@@ -671,11 +666,12 @@ AOP是Aspect-oriented Programming的简称，中文意思是面向切面编程�
 - Join Point：切入点，即被切入的方法
 
 - Advice：通知，用来在目标方法上做增强。
-    - Before advice： 前置通知
-    - After returning advice： 后置正常返回通知(目标方法不抛出异常)
-    - After throwing advice：后置异常通知(目标方法抛出异常)
-    - After finally advice: 不管是否抛出异常，方法执行完就会执行该通知。
-    - Around advice: 环绕通知，能够在目标方法执行前后执行的通知。
+  
+  - Before advice： 前置通知
+  - After returning advice： 后置正常返回通知(目标方法不抛出异常)
+  - After throwing advice：后置异常通知(目标方法抛出异常)
+  - After finally advice: 不管是否抛出异常，方法执行完就会执行该通知。
+  - Around advice: 环绕通知，能够在目标方法执行前后执行的通知。
 
 - Pointcut：切点，用来匹配哪些方法(切入点)要被切入
 
@@ -684,7 +680,6 @@ AOP是Aspect-oriented Programming的简称，中文意思是面向切面编程�
 - AOP Proxy：AOP代理对象，代理对象包含目标对象，用来增强目标对象，从而在目标对象运行前后执行相应的通知。
 
 - Weaving：织入，在编译期间将目标对象和切面链接起来，生成AOP代理对象的过程。
-
 
 ## AOP Proxies
 
@@ -697,6 +692,7 @@ AOP针对接口是同的JDK的动态代理；针对类使用CGLIB。
 需要注意final方法无法被AOP，原因在于无法override。
 
 如何开启@Aspect支持,使用@EnableAspectJAutoProxy注解
+
 ```java
 @Configuration
 @EnableAspectJAutoProxy
@@ -714,9 +710,7 @@ Pointcut是`com.xyz.myapp.CommonPointcuts.businessService()`，表明要被代�
 Join point则是com.xyz.myapp.CommonPointcuts类对象的businessService()方法
 doConcurrentOperation(ProceedingJoinPoint pjp)方法是增强逻辑。增加逻辑是用来多次尝试获取锁，并将未达到最大尝试次数的异常拦截下来，避免中途抛出异常给其他调用者。
 
-
 ```java
-
 @Aspect
 public class ConcurrentOperationExecutor implements Ordered {
 
@@ -763,15 +757,14 @@ Calling code叫做客户端，他需要调用被代理(pojo)的foo()方法。
 
 代理对象(proxy)此时就可以根据前置后置还是环绕等顺序调用我们的通知方法，最后调用被代理对象的foo()方法，并将结果返回给客户端。
 
-
 ![](https://docs.spring.io/spring-framework/docs/current/reference/html/images/aop-proxy-call.png)
 
 # 空安全
 
-
 # 事务管理
 
-事务管理英文全称为Transaction Management
+事务管理英文全称为Transaction Management。包含四个特性：原子性、一致性、隔离性和永久性。
+
 
 核心组件是`TransactionManager`。
 
@@ -781,6 +774,8 @@ Calling code叫做客户端，他需要调用被代理(pojo)的foo()方法。
 
 AOP的出现使得声明式事务管理成为可能。
 
+在Spring的声明式事务中，可以配置事务的隔离级别等。
+
 `TransactionInterceptor`是Spring提供的一个切面，用来管理声明式事物的。
 
 它会切入标注了@Transactional注解的方法，执行内置的通知方法，从而完成事务管理。
@@ -789,34 +784,36 @@ AOP的出现使得声明式事务管理成为可能。
 
 ![](https://docs.spring.io/spring-framework/docs/current/reference/html/images/tx.png)
 
-
 ### 例子
 
 - 被事务管理的Bean
-```java
-public class DefaultFooService implements FooService {
-
+  
+  ```java
+  public class DefaultFooService implements FooService {
+  
     @Override
     public Foo getFoo(String fooName) {
         // ...
     }
-
+  
     @Override
     public Foo getFoo(String fooName, String barName) {
         // ...
     }
-
+  
     @Override
     public void insertFoo(Foo foo) {
         // ...
     }
-
+  
     @Override
     public void updateFoo(Foo foo) {
         // ...
     }
-}
+  }
+  ```
 
+```java
 public final class Boot {
 
     public static void main(final String[] args) throws Exception {
@@ -824,9 +821,9 @@ public final class Boot {
         FooService fooService = ctx.getBean(FooService.class);
         fooService.insertFoo(new Foo());
     }
+
 }
 ```
-
 `context.xml`，Bean配置和事务管理配置
 
 ```xml
@@ -918,3 +915,117 @@ public class DefaultFooService implements FooService {
 
 !> 注意，Spring声明式的事物是基于AOP的，也就是说如果目标对象自调用内部方法，则不会被事物管理器所管理。
 
+
+## 事务传播(Transaction Propagation)
+
+- PROPAGATION_REQUIRED: 默认的传播行为，不存在则创建；外围存在就加入。
+- PROPAGATION_REQUIRES_NEW: 每次创建一个新的事务。不会影响外围事务。拥有自己的隔离级别和超时时间设置等。
+- PROPAGATION_NESTED: 使用单条物理事务，通过多个savepoint来保证inner的事务进行部分回退。只用于JDBC。
+
+
+## 使用@Transactional注解：
+
+**声明事务管理器**
+```java
+// construct an appropriate transaction manager
+DataSourceTransactionManager txManager = new DataSourceTransactionManager(getDataSource());
+
+// configure the AnnotationTransactionAspect to use it; this must be done before executing any transactional methods
+AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager);
+```
+
+## 编程式事务管理
+Programmatic Transaction Management。
+提供了两种方式：
+- 使用TransactionTemplate或TransactionalOperator(用于Reactive应用)。
+- 直接实现TransactionMananger
+
+- 使用TransactionTemplate
+
+```java
+public class SimpleService implements Service {
+
+    // single TransactionTemplate shared amongst all methods in this instance
+    private final TransactionTemplate transactionTemplate;
+
+    // use constructor-injection to supply the PlatformTransactionManager
+    public SimpleService(PlatformTransactionManager transactionManager) {
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
+    }
+
+    public Object someServiceMethod() {
+        return transactionTemplate.execute(new TransactionCallback() {
+            // the code in this method runs in a transactional context
+            public Object doInTransaction(TransactionStatus status) {
+                updateOperation1();
+                return resultOfUpdateOperation2();
+            }
+        });
+    }
+    
+    
+    public Object someServiceMethodWithoutResult() {
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+            protected void doInTransactionWithoutResult(TransactionStatus status){
+                updateOperation1();
+                updateOperation2();
+            }
+        });
+    }
+}
+```
+
+- 使用TransactionManager
+
+对于普通的应用，
+使用PlatformTransactionManager。以下是使用例子。
+
+```java
+DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+// explicitly setting the transaction name is something that can be done only programmatically
+def.setName("SomeTxName");
+def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+
+TransactionStatus status = txManager.getTransaction(def);
+try {
+    // put your business logic here
+} catch (MyException ex) {
+    txManager.rollback(status);
+    throw ex;
+}
+txManager.commit(status);
+```
+
+
+对于reactive 应用
+
+使用ReactiveTransactionManager。
+
+
+声明式和编程式如何抉择？
+
+对于小量的事务操作，编程式和声明式均可。
+对于大量的事务操作，声明式更为简洁，业务代码和事务代码抽离。
+
+
+## 事务边界事件。
+
+对于事务的四个阶段: BEFORE_COMMIT, AFTER_COMMIT (default), AFTER_ROLLBACK, AFTER_COMPLETION.
+
+w我们可以创建监听器，用于监听事务各个阶段的相关事件，做出对应的操作。
+
+比如日志记录等等。
+
+```java
+@Component
+public class MyComponent {
+
+    @TransactionalEventListener
+    public void handleOrderCreatedEvent(CreationEvent<Order> creationEvent) {
+        // ...
+    }
+}
+```
+
+
+> @TransactionalEventListener只能用于普通应用中，不能用于reactive应用。
