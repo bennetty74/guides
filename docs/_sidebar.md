@@ -10,6 +10,6 @@
 
 * [Spring MVC](/spring-mvc.md)
 
-* [Redis](/Redis.md)
+* [Redis](/redis.md)
 
 * 

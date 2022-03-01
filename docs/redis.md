@@ -20,17 +20,11 @@ Redis包含如下数据结构：`String` `List` `Set`  `Hash` `Sorted Set`
 
 - Sorted Set：时间复杂度插入删除O(logN)，按照内部评分(score的浮动值)进行排序。
 
-
-
 > 以上数据结构是针对redis的value角度提出的。即redis包含key，而value包含如上的五种数据结构。
 
 ## Redis LRU
 
-
-
 Redis可以使用 `maxmemory` 指令来限制最大使用内存，如果超过该内存限制则会执行配置的过期策略。
-
-
 
 过期策略分为以下几种：
 
@@ -50,11 +44,7 @@ Redis可以使用 `maxmemory` 指令来限制最大使用内存，如果超过�
   
   - TTL：在设置了过期时间的key中选择即将过期时间最短的key清除掉
 
-
-
 >  Redis中的LRU使用的是近似LRU的算法来执行过期清理的。本质上是选择样本集中的最老的key去清楚掉。
-
-
 
 ![](https://redis.io/images/redisdoc/lru_comparison.png)
 
@@ -66,11 +56,7 @@ Redis可以使用 `maxmemory` 指令来限制最大使用内存，如果超过�
 
 Redis Distributed Lock
 
-
-
 **分为单机版本和集群版本。**
-
-
 
 ### 单机版本
 
@@ -78,21 +64,13 @@ Redis Distributed Lock
 
 表示针对资源(key)设置一个随机value。NX标识不存在则创建，PX 30000标识过期时间为30S.
 
-
-
 ```
  SET resource_name my_random_value NX PX 30000
 ```
 
-
-
 获取锁：当resource_name存在时表示获取锁失败。如果不存在表示可以获取锁，但是所得持有时间只有30S。如果30S内客户端没有释放锁，会由Redis自动释放。
 
-
-
 释放锁：如下Lua代码表示，只有客户端创建时的 `my_random_value`为申请时的value时，才会成功释放锁。为什么这样做的原因是如果丹村通过del删除resource_name(key)，则可能存在如下情况：
-
-
 
 假设客户端A申请锁成功，但是因为某些原因阻塞超过30S，被Redis手动释放；客户端B此时正好申请锁，因为已经被释放掉了，所以客户端B申请成功，但是此时客户端A阻塞完成，准备释放自己方式获取的锁，如果单纯通过del则会删除客户端B的锁，所以需要my_random_value用来唯一标识客户端申请的锁。___
 
@@ -106,19 +84,13 @@ end
 
 ### 集群版本
 
-
-
 集群版本使用的是RedClock
 
 大意是创建奇数个Redis实例，客户端需要向 `(N/2)+1` 个实例获得锁，才表示真正获得锁。
 
 反之是获取失败。
 
-
-
 **该算法未被证明可行性。** 
-
-
 
 ## Redis事务
 
@@ -143,8 +115,6 @@ SET mykey $val
 EXEC
 ```
 
-
-
 ## 持久化
 
 Redis持久化措施分为以下四种：
@@ -156,5 +126,3 @@ Redis持久化措施分为以下四种：
 - No Persistence：不持久化
 
 - RDB+AOF：两种结合，
-
-
