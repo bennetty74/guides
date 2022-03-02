@@ -12,4 +12,4 @@
 
 * [Redis](/redis.md)
 
-* 
+* [Distributed](/distributed.md)
