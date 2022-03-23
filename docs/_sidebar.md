@@ -4,6 +4,8 @@
 
 * [Java虚拟机](/JVM.md) 
 
+* [HTTP](/http.md)
+
 * [Spring](/spring.md)
 
 * [Spring Boot](/spring-boot.md)
@@ -13,3 +15,5 @@
 * [Redis](/redis.md)
 
 * [Distributed](/distributed.md)
+
+* [UML](/uml.md)
