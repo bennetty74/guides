@@ -33,15 +33,9 @@ http://www.example.com:80/path/to/myfile.html
 ?key1=value1&key2=value2#SomewhereInTheDocument
 ```
 
-
-
 ## HTTP消息格式
 
-
-
 HTTP是基于请求-响应模式下的一种应答协议，对应规范也分为两种，分别是Request和Response。
-
-
 
 ### Request
 
@@ -70,8 +64,6 @@ User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
 
 请求方法除了POST请求，还包含GET、DELETE、PUT、OPTION等请求方法。
 
-
-
 #### 请求头
 
 第二行到第八行是请求头，请求头是可选的，主要用来描述请求的相关格式或者要求。
@@ -80,17 +72,11 @@ User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
 
 如Host是请求的主机域名，Content-Length向服务器指明请求体的内容长度，User-Agent表明请求的客户端为Mozilla/5.0。
 
-
-
 > 请求头对大小写不敏感。
-
-
 
 #### 空行
 
 空行没有特殊的含义，主要作用是用来分割请求头和请求体。
-
-
 
 #### 请求体
 
@@ -100,21 +86,11 @@ User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
 GET /test.html?query=alibaba HTTP/1.1
 ```
 
-
-
-
-
 请求体主要是为了处理长请求内容而出现的，比如上传文件、提交表单信息。
-
-
 
 ### Response
 
-
-
 Response中文意思为响应，即对请求作出的回答。和Request相比，响应同样分为相应行、响应头、空行和响应体四部分。
-
-
 
 如下是一段典型的响应。
 
@@ -137,31 +113,21 @@ X-Backend-Response: 0.003
 </html>
 ```
 
-
-
 #### 响应行
 
 第一行为响应行，包含三部分：HTTP版本(HTTP/1.1)、状态码(200)和状态文本(OK)。
-
-
 
 ### 响应头
 
 响应头的格式和请求头的格式基本一样的，这里不再赘述。
 
-
-
 #### 空行
 
 作分割响应头和响应体用。
 
-
-
 #### 响应体
 
 返回客户端的相应数据，如上就是返回客户端一段html代码。如果客户端是浏览器，浏览器就会根据相应头的content-type和响应体将响应体渲染到浏览器中。
-
-
 
 # HTTP连接管理
 
@@ -187,8 +153,6 @@ Connection: keep-alive
 
 如上请求头就告诉服务器要保持长链接了。
 
-
-
 HTTP1.1默认是长链接。
 
 可以通过如下命令关闭长链接。
@@ -197,17 +161,11 @@ HTTP1.1默认是长链接。
 Connection: close 
 ```
 
- 
-
 ### 长链接VS短链接
 
 长链接适用于请求密集，保持长链接有利于减少TCP握手和挥手的时间，从而提供高性能。
 
 短链接适用于资源闲置的情况，这样TCP连接空闲时可以保证服务器不会保证负载过高。
-
-
-
-
 
 > 未完待续。。。
 > 

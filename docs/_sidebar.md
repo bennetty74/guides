@@ -1,8 +1,8 @@
-* [关于](/README.md)
+* [关于](/readme.md)
 
-* [Java基础](/Java.md)
+* [Java基础](/java.md)
 
-* [Java虚拟机](/JVM.md) 
+* [Java虚拟机](/jvm.md)
 
 * [HTTP](/http.md)
 
